@@ -1,0 +1,89 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="stylesheet" href="./styles.css">
+    <title>Document</title>
+</head>
+<body>
+    <h1>MULTIPLE ESP32CAM DASHBOARD</h1>
+    <div class="cards">
+        <div class="card">
+            <img id="ESP32-1" src=""/>
+            <h2><b>CAM 1</b></h2>
+        </div>
+
+        <div class="card">
+            <img id="ESP32-2" src="" />
+            <h2><b>CAM 2</b></h2>
+        </div>
+        <div class="card">
+            <img id="ESP32-3" src="" />
+            <h2><b>CAM 3</b></h2>
+        </div>
+        <div class="card">
+            <img id="ESP32-4" src="" />
+            <h2><b>CAM 4</b></h2>
+        </div>
+    </div>
+    
+    <script>
+        const img_1 = document.getElementById("ESP32-1");
+        const img_2 = document.getElementById("ESP32-2");
+        const img_3 = document.getElementById("ESP32-3");
+        const img_4 = document.getElementById("ESP32-4");
+        var imageFrame;
+
+        const WS_URL = 'ws:///192.168.1.12:8888';
+        const ws = new WebSocket(WS_URL);
+        let urlObject;
+        ws.onopen = () => {
+
+            console.log(`Connected to ${WS_URL}`);
+            ws.send("WEB_CLIENT");
+        };
+
+        ws.onmessage = async (message) => {
+            const arrayBuffer = message.data;
+            if (urlObject) {
+                URL.revokeObjectURL(urlObject);
+            }
+            var blobObj = new Blob([arrayBuffer]);
+            const buf = await blobObj.arrayBuffer();
+            var uint8 = new Uint8Array(buf.slice(12, 13));
+            console.log(uint8)
+            var currentCam = uint8[0];
+
+            console.log("current Cam: ", currentCam);
+            switch(currentCam)
+            {
+                case 1:
+                    {imageFrame =img_1;
+                        break;}
+                case 2:
+                {imageFrame =img_2;
+                        break;}
+                 case 3:
+                {imageFrame =img_3;
+                        break;}    
+                default:
+                    imageFrame =img_4;
+
+            }
+            // imageFrame = (currentCam == 1) ? img_1 : img_2;
+
+
+            urlObject = URL.createObjectURL(blobObj);
+            imageFrame.src = urlObject;
+        }
+    </script>
+</body>
+</html>
+
+<html>
+
+
